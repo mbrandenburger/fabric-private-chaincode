@@ -118,7 +118,7 @@ endif
 
 # Run a specific command (rather than bash) with 'make run-dev' by defining
 # the variable DOCKER_DEV_OPTIONAL_CMD
-DOCKER_DEV_OPTIONAL_CMD=
+DOCKER_DEV_OPTIONAL_CMD ?=
 
 
 
