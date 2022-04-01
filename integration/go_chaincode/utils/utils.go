@@ -7,18 +7,23 @@ import (
 	"strings"
 )
 
-func DetectSgxDevicePath() (string, error) {
-	possiblePaths := []string{"/dev/isgx", "/dev/sgx/enclave"}
+func DetectSgxDevicesPaths() ([]string, error) {
+	possiblePaths := []string{"/dev/isgx", "/dev/sgx/enclave", "/dev/sgx/provision"}
+
+	var detectedPaths []string
 	for _, p := range possiblePaths {
 		if _, err := os.Stat(p); err != nil {
 			continue
 		} else {
-			// first found path returns
-			return p, nil
+			detectedPaths = append(detectedPaths, p)
 		}
 	}
 
-	return "", fmt.Errorf("no sgx device path found")
+	if len(detectedPaths) == 0 {
+		return nil, fmt.Errorf("no sgx devices found")
+	}
+
+	return detectedPaths, nil
 }
 
 func ReadMrenclaveFromFile(path string) (string, error) {
