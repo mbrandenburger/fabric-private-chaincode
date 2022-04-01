@@ -31,6 +31,7 @@ DOCKER_DEV_CONTAINER_NAME = fpc-development-${FPC_VERSION}
 DOCKER_DAEMON_SOCKET ?= /var/run/docker.sock
 
 SGX_DEVICE_PATH ?= $(shell if [ -e "/dev/isgx" ]; then echo "/dev/isgx"; elif [ -e "/dev/sgx/enclave" ]; then echo "/dev/sgx/enclave"; fi)
+SGX_PROVISION_PATH ?= $(shell if [ -e "/dev/sgx/provision" ]; then echo "/dev/sgx/provision"; fi)
 SGX_PSW_SOCKET ?= /var/run/aesmd
 
 DOCKER_GOPATH=/project
@@ -98,6 +99,9 @@ DOCKER_DEV_RUN_OPTS += --net=host
 #   (see above for definitions)
 ifneq ($(SGX_DEVICE_PATH),)
 	DOCKER_DEV_RUN_OPTS += -v "$(DOCKERD_FPC_PATH)/config/ias/":$(DOCKER_FPC_PATH)/config/ias/ -v $(SGX_PSW_SOCKET):$(SGX_PSW_SOCKET) --device $(SGX_DEVICE_PATH)
+endif
+ifneq ($(SGX_PROVISION_PATH),)
+	DOCKER_DEV_RUN_OPTS += -v "/etc/sgx_default_qcnl.conf":"/etc/sgx_default_qcnl.conf" --device $(SGX_PROVISION_PATH)
 endif
 # - pass host sgx mode
 DOCKER_DEV_RUN_OPTS += --env SGX_MODE=$(SGX_MODE)

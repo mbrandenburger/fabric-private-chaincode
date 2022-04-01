@@ -91,9 +91,12 @@ RUN echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu ${U
     #   - algorithm agnostic attestation service (only need once moving to DCAP)
     #      libsgx-quote-ex
     #   - EPID-based attestation service \
-          libsgx-epid
-    #   - DCAP-based attesation service
-    #     libsgx-dcap* ...
+          libsgx-epid \
+    #   - DCAP-based attestation service
+          libsgx-dcap-default-qpl
+
+RUN ln -s /usr/lib/x86_64-linux-gnu/libdcap_quoteprov.so.1 /usr/lib/x86_64-linux-gnu/libdcap_quoteprov.so
+
 
 # Install SGX SDK
 # Note: not all descendents of this base image, e.g., ccenv, boilerplate and fpc-app, build sgx app.

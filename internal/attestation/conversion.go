@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/hyperledger/fabric-private-chaincode/internal/attestation/ego_dcap"
 	"github.com/hyperledger/fabric-private-chaincode/internal/attestation/epid"
 	"github.com/hyperledger/fabric-private-chaincode/internal/attestation/simulation"
 	"github.com/hyperledger/fabric-private-chaincode/internal/attestation/types"
@@ -76,6 +77,7 @@ func NewDefaultCredentialConverter() *CredentialConverter {
 		simulation.NewSimulationConverter(),
 		epid.NewEpidLinkableConverter(),
 		epid.NewEpidUnlinkableConverter(),
+		ego_dcap.NewEgoDcapConverter(),
 	)
 }
 

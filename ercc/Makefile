@@ -6,8 +6,11 @@
 TOP = ..
 include $(TOP)/build.mk
 
-ERCC_GOTAGS ?= -tags WITH_PDO_CRYPTO
+ERCC_GOTAGS ?= -tags WITH_PDO_CRYPTO,WITH_EGO_DCAP
 GOTAGS += $(ERCC_GOTAGS)
+
+# ego specifics
+ENV_FLAGS = CGO_CFLAGS=-I/opt/ego/include CGO_LDFLAGS=-L/opt/ego/lib
 
 build: ercc
 
@@ -15,14 +18,14 @@ ercc: ercc_dependencies
 	# ERCC's binary is created here.
 	# The binary is then referenced by the fpc-peer cli, inserted in the ERCC package,
 	# and eventually run by the external launcher.
-	$(GO) build $(GOTAGS) -o ercc main.go
+	$(ENV_FLAGS) $(GO) build $(GOTAGS) -o ercc main.go
 
 ercc_dependencies:
 	# hard to list explicitly, so just leave empty target,
 	# which forces ecc to always be built
 
 test: build
-	$(GO) test $(GOTAGS) $(GOTESTFLAGS) ./...
+	$(ENV_FLAGS) $(GO) test $(GOTAGS) $(GOTESTFLAGS) ./...
 
 clean: docker-clean
 	$(GO) clean

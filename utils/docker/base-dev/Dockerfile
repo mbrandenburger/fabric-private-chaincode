@@ -107,3 +107,6 @@ RUN git clone https://github.com/nanopb/nanopb.git ${NANOPB_PATH} \
 RUN wget https://github.com/edgelesssys/ego/releases/download/v${EGO_VERSION}/ego_${EGO_VERSION}_amd64.deb \
   && apt install -y -q ./ego_${EGO_VERSION}_amd64.deb \
   && rm ego_${EGO_VERSION}_amd64.deb
+
+RUN apt install -y libsgx-dcap-default-qpl \
+  && ln -s /usr/lib/x86_64-linux-gnu/libdcap_quoteprov.so.1 /usr/lib/x86_64-linux-gnu/libdcap_quoteprov.so
