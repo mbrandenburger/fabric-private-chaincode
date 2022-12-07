@@ -14,10 +14,10 @@ This is where our mock peer comes into the game.
 
 ```bash
 cd $FPC_PATH/utils/fabric/mock-peer
-go run cmd/main.go
+CHAINCODE_SERVER_ADDRESS=localhost:8087 go run cmd/main.go
 ```
 
-TODO finish this
+Via the environment variable `CHAINCODE_SERVER_ADDRESS`, you can define the endpoint of the chaincode.
 
 As the mock peer is just half-baked, we expect to see the following response from the mock peer program.
 ```bash
