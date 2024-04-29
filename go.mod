@@ -40,7 +40,7 @@ require (
 	golang.org/x/tools v0.14.0
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
-	honnef.co/go/tools v0.4.3
+	honnef.co/go/tools v0.4.7
 )
 
 require (
