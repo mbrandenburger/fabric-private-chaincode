@@ -15,7 +15,7 @@ import (
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils/fakes"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-protos-go/peer/lifecycle"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

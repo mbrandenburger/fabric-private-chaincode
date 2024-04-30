@@ -19,7 +19,7 @@ import (
 	fpc "github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/gateway"
 	testutils "github.com/hyperledger/fabric-private-chaincode/integration/client_sdk/go/utils"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

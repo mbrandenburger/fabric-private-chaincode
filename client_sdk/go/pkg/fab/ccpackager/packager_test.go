@@ -13,7 +13,7 @@ import (
 
 	"github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/fab/ccpackager"
 	"github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/sgx"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
