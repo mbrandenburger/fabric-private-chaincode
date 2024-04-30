@@ -8,8 +8,6 @@ package utils
 
 import (
 	"fmt"
-
-	"github.com/hyperledger/fabric/protoutil"
 )
 
 type IdentityEvaluatorInterface interface {
@@ -35,7 +33,7 @@ func (id *IdentityEvaluator) EvaluateCreatorIdentity(creatorIdentityBytes []byte
 }
 
 func ExtractMSPID(serializedIdentityRaw []byte) (string, error) {
-	sID, err := protoutil.UnmarshalSerializedIdentity(serializedIdentityRaw)
+	sID, err := UnmarshalSerializedIdentity(serializedIdentityRaw)
 	if err != nil {
 		return "", err
 	}

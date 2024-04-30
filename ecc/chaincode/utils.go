@@ -15,7 +15,6 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-private-chaincode/internal/protos"
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
-	"github.com/hyperledger/fabric/protoutil"
 )
 
 type Extractors interface {
@@ -89,17 +88,17 @@ func (s *ExtractorImpl) GetChaincodeParams(stub shim.ChaincodeStubInterface) (*p
 		return nil, err
 	}
 
-	proposal, err := protoutil.UnmarshalProposal(signedProposal.ProposalBytes)
+	proposal, err := utils.UnmarshalProposal(signedProposal.ProposalBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	cpp, err := protoutil.UnmarshalChaincodeProposalPayload(proposal.Payload)
+	cpp, err := utils.UnmarshalChaincodeProposalPayload(proposal.Payload)
 	if err != nil {
 		return nil, err
 	}
 
-	cis, err := protoutil.UnmarshalChaincodeInvocationSpec(cpp.Input)
+	cis, err := utils.UnmarshalChaincodeInvocationSpec(cpp.Input)
 	if err != nil {
 		return nil, err
 	}

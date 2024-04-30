@@ -21,7 +21,6 @@ import (
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
 	"github.com/hyperledger/fabric-protos-go/peer/lifecycle"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -67,7 +66,7 @@ var (
 )
 
 func toBase64(credentials *protos.Credentials) string {
-	credentialBytes := protoutil.MarshalOrPanic(credentials)
+	credentialBytes := utils.MarshalOrPanic(credentials)
 	return base64.StdEncoding.EncodeToString(credentialBytes)
 }
 
@@ -142,7 +141,7 @@ func TestRegisterEnclave(t *testing.T) {
 	require.Contains(t, err.Error(), "cannot get chaincode definition")
 
 	// create mock lifecycle chaincode
-	chaincodeStub.InvokeChaincodeReturns(shim.Success(protoutil.MarshalOrPanic(
+	chaincodeStub.InvokeChaincodeReturns(shim.Success(utils.MarshalOrPanicV1(
 		&lifecycle.QueryChaincodeDefinitionResult{
 			Version: mrenclave,
 		})))
@@ -163,7 +162,7 @@ func TestRegisterEnclave(t *testing.T) {
 	err = ercc.RegisterEnclave(transactionContext, credentialBase64)
 	require.EqualError(t, err, "mrenclave does not match chaincode definition")
 
-	chaincodeStub.InvokeChaincodeReturns(shim.Success(protoutil.MarshalOrPanic(
+	chaincodeStub.InvokeChaincodeReturns(shim.Success(utils.MarshalOrPanicV1(
 		&lifecycle.QueryChaincodeDefinitionResult{
 			Version:  mrenclave,
 			Sequence: 1,
@@ -186,7 +185,7 @@ func TestRegisterEnclave(t *testing.T) {
 	err = ercc.RegisterEnclave(transactionContext, credentialBase64)
 	require.EqualError(t, err, "sequence does not match chaincode definition")
 
-	chaincodeStub.InvokeChaincodeReturns(shim.Success(protoutil.MarshalOrPanic(
+	chaincodeStub.InvokeChaincodeReturns(shim.Success(utils.MarshalOrPanicV1(
 		&lifecycle.QueryChaincodeDefinitionResult{
 			Version:  mrenclave,
 			Sequence: 1,

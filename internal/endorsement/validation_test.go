@@ -14,7 +14,6 @@ import (
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/ledger/rwset/kvrwset"
 	"github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -242,7 +241,7 @@ func createChaincodeResponseMessage(chaincodeRequest []byte, chaincodeRequestHas
 	}
 
 	header := &common.Header{
-		ChannelHeader:   protoutil.MarshalOrPanic(chdr),
+		ChannelHeader:   utils.MarshalOrPanicV1(chdr),
 		SignatureHeader: nil,
 	}
 
@@ -257,13 +256,13 @@ func createChaincodeResponseMessage(chaincodeRequest []byte, chaincodeRequestHas
 	}
 
 	payload := &peer.ChaincodeProposalPayload{
-		Input:        protoutil.MarshalOrPanic(input),
+		Input:        utils.MarshalOrPanicV1(input),
 		TransientMap: nil,
 	}
 
 	proposal := &peer.Proposal{
-		Header:    protoutil.MarshalOrPanic(header),
-		Payload:   protoutil.MarshalOrPanic(payload),
+		Header:    utils.MarshalOrPanicV1(header),
+		Payload:   utils.MarshalOrPanicV1(payload),
 		Extension: nil,
 	}
 
@@ -271,7 +270,7 @@ func createChaincodeResponseMessage(chaincodeRequest []byte, chaincodeRequestHas
 		EncryptedResponse: []byte("someEncryptedResponse"),
 		FpcRwSet:          nil,
 		Proposal: &peer.SignedProposal{
-			ProposalBytes: protoutil.MarshalOrPanic(proposal),
+			ProposalBytes: utils.MarshalOrPanicV1(proposal),
 			Signature:     nil,
 		},
 		ChaincodeRequestMessageHash: chaincodeRequestHash,

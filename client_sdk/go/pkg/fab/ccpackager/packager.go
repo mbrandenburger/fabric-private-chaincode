@@ -27,18 +27,20 @@ package ccpackager
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/sgx"
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
-	"github.com/hyperledger/fabric/core/chaincode/persistence"
-	"github.com/hyperledger/fabric/core/chaincode/platforms/util"
 	"github.com/pkg/errors"
 )
 
@@ -132,9 +134,19 @@ func validateRegularPackageInput(p *Descriptor) error {
 		return errors.Errorf("SGXMode must be set either to %s or %s, actual: %s", sgx.SGXModeHwType, sgx.SGXModeSimType, p.SGXMode)
 	}
 
-	if err := persistence.ValidateLabel(p.Label); err != nil {
+	if err := validateLabel(p.Label); err != nil {
 		return err
 	}
+	return nil
+}
+
+var labelRegexp = regexp.MustCompile(`^[[:alnum:]][[:alnum:]_.+-]*$`)
+
+func validateLabel(label string) error {
+	if !labelRegexp.MatchString(label) {
+		return errors.Errorf("invalid label '%s'. Label must be non-empty, can only consist of alphanumerics, symbols from '.+-_', and can only begin with alphanumerics", label)
+	}
+
 	return nil
 }
 
@@ -145,7 +157,7 @@ func validateCaaSPackageInput(p *Descriptor) error {
 		return errors.Wrap(err, "CaaSEndpoint is invalid")
 	}
 
-	if err := persistence.ValidateLabel(p.Label); err != nil {
+	if err := validateLabel(p.Label); err != nil {
 		return err
 	}
 	return nil
@@ -284,7 +296,7 @@ func getDeploymentPayload(ccPath string) ([]byte, error) {
 	tw := tar.NewWriter(gw)
 
 	for _, file := range files {
-		err = util.WriteFileToPackage(filepath.Join(file.Path, file.Name), file.Name, tw)
+		err = writeFileToPackage(filepath.Join(file.Path, file.Name), file.Name, tw)
 		if err != nil {
 			return nil, errors.Wrapf(err, "error writing %s to tar", file.Name)
 		}
@@ -299,6 +311,49 @@ func getDeploymentPayload(ccPath string) ([]byte, error) {
 	}
 
 	return payload.Bytes(), nil
+}
+
+func writeFileToPackage(localpath string, packagepath string, tw *tar.Writer) error {
+	fd, err := os.Open(localpath)
+	if err != nil {
+		return fmt.Errorf("%s: %s", localpath, err)
+	}
+	defer fd.Close()
+
+	fi, err := fd.Stat()
+	if err != nil {
+		return fmt.Errorf("%s: %s", localpath, err)
+	}
+
+	header, err := tar.FileInfoHeader(fi, localpath)
+	if err != nil {
+		return fmt.Errorf("failed calculating FileInfoHeader: %s", err)
+	}
+
+	// Take the variance out of the tar by using zero time and fixed uid/gid.
+	var zeroTime time.Time
+	header.AccessTime = zeroTime
+	header.ModTime = zeroTime
+	header.ChangeTime = zeroTime
+	header.Name = packagepath
+	header.Mode = 0o100644
+	header.Uid = 500
+	header.Gid = 500
+	header.Uname = ""
+	header.Gname = ""
+
+	err = tw.WriteHeader(header)
+	if err != nil {
+		return fmt.Errorf("failed to write header for %s: %s", localpath, err)
+	}
+
+	is := bufio.NewReader(fd)
+	_, err = io.Copy(tw, is)
+	if err != nil {
+		return fmt.Errorf("failed to write %s as %s: %s", localpath, packagepath, err)
+	}
+
+	return nil
 }
 
 func getCaaSDeploymentPayload(desc *Descriptor, writeBytesToPackage writer) ([]byte, error) {

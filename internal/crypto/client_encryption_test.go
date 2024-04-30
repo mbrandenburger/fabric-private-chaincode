@@ -14,7 +14,6 @@ import (
 
 	"github.com/hyperledger/fabric-private-chaincode/internal/protos"
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -144,7 +143,7 @@ func TestReveal(t *testing.T) {
 
 	// msg not encrypted
 	response := &protos.ChaincodeResponseMessage{EncryptedResponse: msg}
-	responseBytes := protoutil.MarshalOrPanic(response)
+	responseBytes := utils.MarshalOrPanic(response)
 	resp, err = ctx.Reveal([]byte(utils.MarshallProtoBase64(&protos.SignedChaincodeResponseMessage{ChaincodeResponseMessage: responseBytes})))
 	assert.Nil(t, resp)
 	assert.Error(t, err)
@@ -153,7 +152,7 @@ func TestReveal(t *testing.T) {
 	encryptedMsg, err := GetDefaultCSP().EncryptMessage(responseEncryptionKey, msg)
 	assert.NoError(t, err)
 	response = &protos.ChaincodeResponseMessage{EncryptedResponse: encryptedMsg}
-	responseBytes = protoutil.MarshalOrPanic(response)
+	responseBytes = utils.MarshalOrPanic(response)
 	resp, err = ctx.Reveal([]byte(utils.MarshallProtoBase64(&protos.SignedChaincodeResponseMessage{ChaincodeResponseMessage: responseBytes})))
 	assert.Equal(t, resp, msg)
 	assert.NoError(t, err)

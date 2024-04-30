@@ -15,7 +15,6 @@ import (
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils/fakes"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-protos-go/peer/lifecycle"
-	"github.com/hyperledger/fabric/protoutil"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -53,8 +52,7 @@ var _ = Describe("Chaincode utils", func() {
 					Sequence: 666,
 					Version:  "someVersion",
 				}
-				dfBytes, err := protoutil.Marshal(df)
-				Expect(err).ShouldNot(HaveOccurred())
+				dfBytes := utils.MarshalOrPanicV1(df)
 				stub.InvokeChaincodeReturns(shim.Success(dfBytes))
 			})
 
@@ -96,8 +94,7 @@ var _ = Describe("Chaincode utils", func() {
 					Version: expectedMrEnclave,
 				}
 
-				dfBytes, err := protoutil.Marshal(df)
-				Expect(err).ShouldNot(HaveOccurred())
+				dfBytes := utils.MarshalOrPanicV1(df)
 				stub.InvokeChaincodeReturns(shim.Success(dfBytes))
 			})
 
@@ -115,8 +112,7 @@ var _ = Describe("Chaincode utils", func() {
 					Version:  "",
 				}
 
-				dfBytes, err := protoutil.Marshal(df)
-				Expect(err).ShouldNot(HaveOccurred())
+				dfBytes := utils.MarshalOrPanicV1(df)
 				stub.InvokeChaincodeReturns(shim.Success(dfBytes))
 			})
 
@@ -133,8 +129,7 @@ var _ = Describe("Chaincode utils", func() {
 					Version: "mK7WHJHyWKN8aO1JQyl2lWR+x7vmAIzBEbChJlDr65E=",
 				}
 
-				dfBytes, err := protoutil.Marshal(df)
-				Expect(err).ShouldNot(HaveOccurred())
+				dfBytes := utils.MarshalOrPanicV1(df)
 				stub.InvokeChaincodeReturns(shim.Success(dfBytes))
 			})
 

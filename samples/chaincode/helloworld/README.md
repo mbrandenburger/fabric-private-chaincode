@@ -549,7 +549,7 @@ import (
 
 	fpc "github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/gateway"
 	"github.com/hyperledger/fabric-private-chaincode/integration/client_sdk/go/utils"
-	"github.com/hyperledger/fabric/common/flogging"
+    "github.com/hyperledger/fabric-lib-go/common/flogging"
 )
 
 var logger = flogging.MustGetLogger("helloworld")

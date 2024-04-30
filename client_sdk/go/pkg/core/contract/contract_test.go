@@ -13,8 +13,8 @@ import (
 	fpccontract "github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/core/contract"
 	"github.com/hyperledger/fabric-private-chaincode/client_sdk/go/pkg/core/contract/fakes"
 	"github.com/hyperledger/fabric-private-chaincode/internal/crypto"
+	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
 	"github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -249,5 +249,5 @@ func TestContractSubmitTransaction(t *testing.T) {
 }
 
 func asResponseBytes(input []byte) []byte {
-	return protoutil.MarshalOrPanic(&peer.Response{Payload: input, Status: 200})
+	return utils.MarshalOrPanicV1(&peer.Response{Payload: input, Status: 200})
 }

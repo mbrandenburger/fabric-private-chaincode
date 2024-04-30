@@ -17,11 +17,11 @@ import (
 	//lint:ignore SA1019 old protos are needed for fabric
 	protoV1 "github.com/golang/protobuf/proto"
 
-	"github.com/hyperledger/fabric-private-chaincode/internal/protos"
+	fpcprotos "github.com/hyperledger/fabric-private-chaincode/internal/protos"
 	"github.com/hyperledger/fabric-protos-go/common"
-	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric-protos-go/msp"
+	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-protos-go/peer/lifecycle"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -37,6 +37,11 @@ func MarshallProto(msg proto.Message) ([]byte, error) {
 	return proto.Marshal(msg)
 }
 
+// MarshallProtoV1 returns a serialized protobuf message
+func MarshallProtoV1(msg protoV1.Message) ([]byte, error) {
+	return protoV1.Marshal(msg)
+}
+
 func MarshalOrPanic(pb proto.Message) []byte {
 	data, err := proto.Marshal(pb)
 	if err != nil {
@@ -45,7 +50,15 @@ func MarshalOrPanic(pb proto.Message) []byte {
 	return data
 }
 
-func UnmarshalCredentials(credentialsBase64 string) (*protos.Credentials, error) {
+func MarshalOrPanicV1(pb protoV1.Message) []byte {
+	data, err := protoV1.Marshal(pb)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func UnmarshalCredentials(credentialsBase64 string) (*fpcprotos.Credentials, error) {
 	credentialsBytes, err := base64.StdEncoding.DecodeString(credentialsBase64)
 	if err != nil {
 		return nil, err
@@ -55,7 +68,7 @@ func UnmarshalCredentials(credentialsBase64 string) (*protos.Credentials, error)
 		return nil, fmt.Errorf("credential input empty")
 	}
 
-	credentials := &protos.Credentials{}
+	credentials := &fpcprotos.Credentials{}
 	err = proto.Unmarshal(credentialsBytes, credentials)
 	if err != nil {
 		return nil, err
@@ -63,12 +76,12 @@ func UnmarshalCredentials(credentialsBase64 string) (*protos.Credentials, error)
 	return credentials, nil
 }
 
-func UnmarshalAttestedData(serializedAttestedData *anypb.Any) (*protos.AttestedData, error) {
+func UnmarshalAttestedData(serializedAttestedData *anypb.Any) (*fpcprotos.AttestedData, error) {
 	if serializedAttestedData == nil {
 		return nil, errors.New("attested data is empty")
 	}
 
-	attestedData := &protos.AttestedData{}
+	attestedData := &fpcprotos.AttestedData{}
 	if err := serializedAttestedData.UnmarshalTo(attestedData); err != nil {
 		return nil, errors.Wrap(err, "invalid attested data message")
 	}
@@ -76,12 +89,12 @@ func UnmarshalAttestedData(serializedAttestedData *anypb.Any) (*protos.AttestedD
 	return attestedData, nil
 }
 
-func UnmarshalInitEnclaveMessage(data []byte) (*protos.InitEnclaveMessage, error) {
+func UnmarshalInitEnclaveMessage(data []byte) (*fpcprotos.InitEnclaveMessage, error) {
 	if data == nil {
 		return nil, errors.New("initEnclaveMessage is empty")
 	}
 
-	msg := &protos.InitEnclaveMessage{}
+	msg := &fpcprotos.InitEnclaveMessage{}
 	if err := proto.Unmarshal(data, msg); err != nil {
 		return nil, errors.Wrap(err, "invalid attested data message")
 	}
@@ -95,18 +108,18 @@ func UnmarshalQueryChaincodeDefinitionResult(data []byte) (*lifecycle.QueryChain
 	}
 
 	df := &lifecycle.QueryChaincodeDefinitionResult{}
-	if err := proto.Unmarshal(data, protoV1.MessageV2(df)); err != nil {
+	if err := protoV1.Unmarshal(data, df); err != nil {
 		return nil, errors.Wrap(err, "invalid QueryChaincodeDefinitionResult")
 	}
 	return df, nil
 }
 
-func UnmarshalSignedChaincodeResponseMessage(data []byte) (*protos.SignedChaincodeResponseMessage, error) {
+func UnmarshalSignedChaincodeResponseMessage(data []byte) (*fpcprotos.SignedChaincodeResponseMessage, error) {
 	if len(data) == 0 {
 		return nil, fmt.Errorf("SignedChaincodeResponseMessage is empty")
 	}
 
-	msg := &protos.SignedChaincodeResponseMessage{}
+	msg := &fpcprotos.SignedChaincodeResponseMessage{}
 	if err := proto.Unmarshal(data, msg); err != nil {
 		return nil, errors.Wrap(err, "invalid SignedChaincodeResponseMessage")
 	}
@@ -114,12 +127,12 @@ func UnmarshalSignedChaincodeResponseMessage(data []byte) (*protos.SignedChainco
 	return msg, nil
 }
 
-func UnmarshalChaincodeResponseMessage(data []byte) (*protos.ChaincodeResponseMessage, error) {
+func UnmarshalChaincodeResponseMessage(data []byte) (*fpcprotos.ChaincodeResponseMessage, error) {
 	if len(data) == 0 {
 		return nil, fmt.Errorf("ChaincodeResponseMessage data empty")
 	}
 
-	msg := &protos.ChaincodeResponseMessage{}
+	msg := &fpcprotos.ChaincodeResponseMessage{}
 	if err := proto.Unmarshal(data, msg); err != nil {
 		return nil, errors.Wrap(err, "invalid ChaincodeResponseMessage")
 	}
@@ -128,15 +141,15 @@ func UnmarshalChaincodeResponseMessage(data []byte) (*protos.ChaincodeResponseMe
 }
 
 // GetEnclaveId returns enclave_id as hex-encoded string of SHA256 hash over enclave_vk.
-func GetEnclaveId(attestedData *protos.AttestedData) string {
+func GetEnclaveId(attestedData *fpcprotos.AttestedData) string {
 	// hash enclave vk
 	h := sha256.Sum256(attestedData.EnclaveVk)
 	// encode and normalize
 	return strings.ToUpper(hex.EncodeToString(h[:]))
 }
 
-func ExtractEndpoint(credentials *protos.Credentials) (string, error) {
-	attestedData := &protos.AttestedData{}
+func ExtractEndpoint(credentials *fpcprotos.Credentials) (string, error) {
+	attestedData := &fpcprotos.AttestedData{}
 	err := credentials.SerializedAttestedData.UnmarshalTo(attestedData)
 	if err != nil {
 		return "", err
@@ -145,7 +158,7 @@ func ExtractEndpoint(credentials *protos.Credentials) (string, error) {
 	return attestedData.HostParams.PeerEndpoint, nil
 }
 
-func GetChaincodeRequestMessageFromSignedProposal(signedProposal *pb.SignedProposal) (crmProtoBytes []byte, e error) {
+func GetChaincodeRequestMessageFromSignedProposal(signedProposal *peer.SignedProposal) (crmProtoBytes []byte, e error) {
 	// This function is based on the `newChaincodeStub` in
 	// https://github.com/hyperledger/fabric-chaincode-go/blob/9b3ae92d8664f398fe9846561fafde44864d55e3/shim/stub.go
 	// In particular, it serves to
@@ -159,7 +172,7 @@ func GetChaincodeRequestMessageFromSignedProposal(signedProposal *pb.SignedPropo
 
 	var err error
 
-	proposal, err := protoutil.UnmarshalProposal(signedProposal.ProposalBytes)
+	proposal, err := UnmarshalProposal(signedProposal.ProposalBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract Proposal from SignedProposal: %s", err)
 	}
@@ -170,13 +183,13 @@ func GetChaincodeRequestMessageFromSignedProposal(signedProposal *pb.SignedPropo
 	}
 
 	// extract header
-	hdr, err := protoutil.UnmarshalHeader(proposal.GetHeader())
+	hdr, err := UnmarshalHeader(proposal.GetHeader())
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract proposal header: %s", err)
 	}
 
 	// validate channel header
-	chdr, err := protoutil.UnmarshalChannelHeader(hdr.ChannelHeader)
+	chdr, err := UnmarshalChannelHeader(hdr.ChannelHeader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract channel header: %s", err)
 	}
@@ -192,7 +205,7 @@ func GetChaincodeRequestMessageFromSignedProposal(signedProposal *pb.SignedPropo
 	}
 
 	// extract args from proposal payload
-	payload, err := protoutil.UnmarshalChaincodeProposalPayload(proposal.GetPayload())
+	payload, err := UnmarshalChaincodeProposalPayload(proposal.GetPayload())
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract proposal payload: %s", err)
 	}
@@ -200,7 +213,7 @@ func GetChaincodeRequestMessageFromSignedProposal(signedProposal *pb.SignedPropo
 	if cppInput == nil {
 		return nil, fmt.Errorf("failed to get chaincode proposal payload input")
 	}
-	chaincodeInvocationSpec, err := protoutil.UnmarshalChaincodeInvocationSpec(cppInput)
+	chaincodeInvocationSpec, err := UnmarshalChaincodeInvocationSpec(cppInput)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal chaincodeInvocationSpec: %s", err)
 	}
@@ -236,7 +249,7 @@ func GetChaincodeRequestMessageFromSignedProposal(signedProposal *pb.SignedPropo
 // UnwrapResponse unmarshalls the given serialized peer.Response message and returns the Payload field if Status is 200;
 // otherwise, the Message field is returned as an error
 func UnwrapResponse(responseBytes []byte) (payload []byte, err error) {
-	clearResponse, err := protoutil.UnmarshalResponse(responseBytes)
+	clearResponse, err := UnmarshalResponse(responseBytes)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal peer.Response message")
 	}
@@ -246,4 +259,58 @@ func UnwrapResponse(responseBytes []byte) (payload []byte, err error) {
 	}
 
 	return clearResponse.Payload, nil
+}
+
+// UnmarshalResponse unmarshals bytes to a Response
+func UnmarshalResponse(resBytes []byte) (*peer.Response, error) {
+	response := &peer.Response{}
+	err := protoV1.Unmarshal(resBytes, response)
+	return response, errors.Wrap(err, "error unmarshalling Response")
+}
+
+func UnmarshalSerializedIdentity(bytes []byte) (*msp.SerializedIdentity, error) {
+	sid := &msp.SerializedIdentity{}
+	err := protoV1.Unmarshal(bytes, sid)
+	return sid, errors.Wrap(err, "error unmarshalling SerializedIdentity")
+}
+
+func UnmarshalProposal(propBytes []byte) (*peer.Proposal, error) {
+	prop := &peer.Proposal{}
+	err := protoV1.Unmarshal(propBytes, prop)
+	return prop, errors.Wrap(err, "error unmarshalling Proposal")
+}
+
+// UnmarshalHeader unmarshals bytes to a Header
+func UnmarshalHeader(bytes []byte) (*common.Header, error) {
+	hdr := &common.Header{}
+	err := protoV1.Unmarshal(bytes, hdr)
+	return hdr, errors.Wrap(err, "error unmarshalling Header")
+}
+
+// UnmarshalChannelHeader unmarshals bytes to a ChannelHeader
+func UnmarshalChannelHeader(bytes []byte) (*common.ChannelHeader, error) {
+	chdr := &common.ChannelHeader{}
+	err := protoV1.Unmarshal(bytes, chdr)
+	return chdr, errors.Wrap(err, "error unmarshalling ChannelHeader")
+}
+
+// UnmarshalSignatureHeader unmarshals bytes to a SignatureHeader
+func UnmarshalSignatureHeader(bytes []byte) (*common.SignatureHeader, error) {
+	sh := &common.SignatureHeader{}
+	err := protoV1.Unmarshal(bytes, sh)
+	return sh, errors.Wrap(err, "error unmarshalling SignatureHeader")
+}
+
+// UnmarshalChaincodeProposalPayload unmarshals bytes to a ChaincodeProposalPayload
+func UnmarshalChaincodeProposalPayload(bytes []byte) (*peer.ChaincodeProposalPayload, error) {
+	cpp := &peer.ChaincodeProposalPayload{}
+	err := protoV1.Unmarshal(bytes, cpp)
+	return cpp, errors.Wrap(err, "error unmarshalling ChaincodeProposalPayload")
+}
+
+// UnmarshalChaincodeInvocationSpec unmarshals bytes to a ChaincodeInvocationSpec
+func UnmarshalChaincodeInvocationSpec(encoded []byte) (*peer.ChaincodeInvocationSpec, error) {
+	cis := &peer.ChaincodeInvocationSpec{}
+	err := protoV1.Unmarshal(encoded, cis)
+	return cis, errors.Wrap(err, "error unmarshalling ChaincodeInvocationSpec")
 }

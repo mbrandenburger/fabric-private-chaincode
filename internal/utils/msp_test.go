@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/hyperledger/fabric-protos-go/msp"
-	"github.com/hyperledger/fabric/protoutil"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -29,7 +28,7 @@ var _ = Describe("Chaincode utils", func() {
 
 		When("mspid mismatch", func() {
 			It("should return an error", func() {
-				sid := protoutil.MarshalOrPanic(&msp.SerializedIdentity{Mspid: "someMSP"})
+				sid := MarshalOrPanicV1(&msp.SerializedIdentity{Mspid: "someMSP"})
 				err := eval.EvaluateCreatorIdentity(sid, "dummyMsp")
 				Expect(err).Should(HaveOccurred())
 			})
@@ -37,7 +36,7 @@ var _ = Describe("Chaincode utils", func() {
 
 		When("mspid match", func() {
 			It("should return no error", func() {
-				sid := protoutil.MarshalOrPanic(&msp.SerializedIdentity{Mspid: "dummyMsp"})
+				sid := MarshalOrPanicV1(&msp.SerializedIdentity{Mspid: "dummyMsp"})
 				err := eval.EvaluateCreatorIdentity(sid, "dummyMsp")
 				Expect(err).ShouldNot(HaveOccurred())
 			})

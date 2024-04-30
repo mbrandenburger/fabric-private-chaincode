@@ -12,7 +12,6 @@ import (
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/peer/lifecycle"
-	"github.com/hyperledger/fabric/protoutil"
 )
 
 const MrEnclaveLength = 32
@@ -25,7 +24,7 @@ func GetChaincodeDefinition(chaincodeId string, stub shim.ChaincodeStubInterface
 		Name: chaincodeId,
 	}
 	// note that we use Fabric's Marshall as it still uses protobuf V1
-	argsBytes, err := protoutil.Marshal(args)
+	argsBytes, err := MarshallProtoV1(args)
 	if err != nil {
 		return nil, err
 	}

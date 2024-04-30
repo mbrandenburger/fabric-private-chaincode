@@ -15,13 +15,13 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-lib-go/bccsp"
+	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 	"github.com/hyperledger/fabric-private-chaincode/ecc_go/chaincode/enclave_go/attestation"
 	"github.com/hyperledger/fabric-private-chaincode/internal/crypto"
 	"github.com/hyperledger/fabric-private-chaincode/internal/protos"
-	"github.com/hyperledger/fabric/bccsp"
-	"github.com/hyperledger/fabric/bccsp/factory"
-	"github.com/hyperledger/fabric/common/flogging"
-	"github.com/hyperledger/fabric/protoutil"
+	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -165,7 +165,7 @@ func (e *EnclaveStub) ChaincodeInvoke(stub shim.ChaincodeStubInterface, chaincod
 	ccResponse := e.ccRef.Invoke(fpcStub)
 
 	// marshal chaincode response
-	ccResponseBytes, err := protoutil.Marshal(&ccResponse)
+	ccResponseBytes, err := utils.MarshallProtoV1(&ccResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -211,17 +211,17 @@ func (e *EnclaveStub) verifySignedProposal(stub shim.ChaincodeStubInterface, cha
 		return err
 	}
 
-	proposal, err := protoutil.UnmarshalProposal(signedProposal.GetProposalBytes())
+	proposal, err := utils.UnmarshalProposal(signedProposal.GetProposalBytes())
 	if err != nil {
 		return errors.Wrap(err, "cannot unmarshal proposal")
 	}
 
-	header, err := protoutil.UnmarshalHeader(proposal.GetHeader())
+	header, err := utils.UnmarshalHeader(proposal.GetHeader())
 	if err != nil {
 		return errors.Wrap(err, "cannot unmarshal proposal header")
 	}
 
-	channelHeader, err := protoutil.UnmarshalChannelHeader(header.GetChannelHeader())
+	channelHeader, err := utils.UnmarshalChannelHeader(header.GetChannelHeader())
 	if err != nil {
 		return errors.Wrap(err, "cannot unmarshal channel header")
 	}
@@ -230,7 +230,7 @@ func (e *EnclaveStub) verifySignedProposal(stub shim.ChaincodeStubInterface, cha
 		return fmt.Errorf("channelId='%s' does not match as initialized with cc_parameters='%s'", channelHeader.GetChannelId(), e.chaincodeParams.GetChannelId())
 	}
 
-	signatureHeader, err := protoutil.UnmarshalSignatureHeader(header.GetSignatureHeader())
+	signatureHeader, err := utils.UnmarshalSignatureHeader(header.GetSignatureHeader())
 	if err != nil {
 		return errors.Wrap(err, "cannot unmarshal signa header")
 	}
@@ -250,7 +250,7 @@ func checkSignatureFromCreator(creatorBytes, sig, msg []byte, cryptoProvider bcc
 
 	// TODO check if serializedIdentity is idemix
 
-	sId, err := protoutil.UnmarshalSerializedIdentity(creatorBytes)
+	sId, err := utils.UnmarshalSerializedIdentity(creatorBytes)
 	if err != nil {
 		return errors.Wrap(err, "could not deserialize a SerializedIdentity; note that idemix is currently not supported")
 	}

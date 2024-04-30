@@ -12,7 +12,6 @@ import (
 	"github.com/hyperledger/fabric-protos-go/msp"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-protos-go/peer/lifecycle"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
 )
@@ -40,7 +39,7 @@ func TestGetInitEnclaveMessage(t *testing.T) {
 
 	// wrong message encoding
 	stub = &fakes.ChaincodeStub{}
-	stub.GetStringArgsReturns([]string{"no-base64", string(protoutil.MarshalOrPanic(msg))})
+	stub.GetStringArgsReturns([]string{"no-base64", string(utils.MarshalOrPanic(msg))})
 	initMsg, err = ex.GetInitEnclaveMessage(stub)
 	assert.Nil(t, initMsg)
 	assert.Error(t, err)
@@ -91,7 +90,7 @@ func TestGetChaincodeResponseMessages(t *testing.T) {
 
 	// wrong message encoding
 	stub = &fakes.ChaincodeStub{}
-	stub.GetStringArgsReturns([]string{"no-base64", string(protoutil.MarshalOrPanic(signedRespMsg))})
+	stub.GetStringArgsReturns([]string{"no-base64", string(utils.MarshalOrPanic(signedRespMsg))})
 	signedResp, resp, err = ex.GetChaincodeResponseMessages(stub)
 	assert.Nil(t, signedResp)
 	assert.Nil(t, resp)
@@ -119,11 +118,11 @@ func TestGetChaincodeParams(t *testing.T) {
 	// getChaincodeDefinition error
 	stub = &fakes.ChaincodeStub{}
 	signedProposal := &peer.SignedProposal{
-		ProposalBytes: protoutil.MarshalOrPanic(
+		ProposalBytes: utils.MarshalOrPanicV1(
 			&peer.Proposal{
-				Payload: protoutil.MarshalOrPanic(
+				Payload: utils.MarshalOrPanicV1(
 					&peer.ChaincodeProposalPayload{
-						Input: protoutil.MarshalOrPanic(
+						Input: utils.MarshalOrPanicV1(
 							&peer.ChaincodeInvocationSpec{
 								ChaincodeSpec: &peer.ChaincodeSpec{
 									ChaincodeId: &peer.ChaincodeID{Name: chaincodeId},
@@ -147,7 +146,7 @@ func TestGetChaincodeParams(t *testing.T) {
 	stub.GetChannelIDReturns(channelId)
 	stub.InvokeChaincodeReturns(peer.Response{
 		Status: shim.OK,
-		Payload: protoutil.MarshalOrPanic(
+		Payload: utils.MarshalOrPanicV1(
 			&lifecycle.QueryChaincodeDefinitionResult{
 				Sequence: chaincodeSequence,
 				Version:  chaincodeVersion,
@@ -181,14 +180,14 @@ func TestGetHostParams(t *testing.T) {
 	sid := &msp.SerializedIdentity{
 		Mspid: Mspid,
 	}
-	stub.GetCreatorReturns(protoutil.MarshalOrPanic(sid), nil)
+	stub.GetCreatorReturns(utils.MarshalOrPanicV1(sid), nil)
 	hp, err = ex.GetHostParams(stub)
 	assert.Nil(t, hp)
 	assert.Error(t, err)
 
 	// no errors
 	stub = &fakes.ChaincodeStub{}
-	stub.GetCreatorReturns(protoutil.MarshalOrPanic(sid), nil)
+	stub.GetCreatorReturns(utils.MarshalOrPanicV1(sid), nil)
 	initMsg := &protos.InitEnclaveMessage{PeerEndpoint: PeerEndpoint}
 	stub.GetStringArgsReturns([]string{"someFunction", utils.MarshallProtoBase64(initMsg)})
 	hp, err = ex.GetHostParams(stub)

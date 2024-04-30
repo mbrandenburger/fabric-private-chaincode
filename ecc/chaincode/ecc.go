@@ -11,13 +11,12 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 	"github.com/hyperledger/fabric-private-chaincode/ecc/chaincode/ercc"
 	"github.com/hyperledger/fabric-private-chaincode/internal/endorsement"
 	"github.com/hyperledger/fabric-private-chaincode/internal/protos"
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/hyperledger/fabric/common/flogging"
-	"github.com/hyperledger/fabric/protoutil"
 )
 
 var logger = flogging.MustGetLogger("ecc")
@@ -67,7 +66,7 @@ func (t *EnclaveChaincode) initEnclave(stub shim.ChaincodeStubInterface) pb.Resp
 		logger.Errorf(errMsg)
 		return shim.Error(errMsg)
 	}
-	serializedChaincodeParams, err := protoutil.Marshal(chaincodeParams)
+	serializedChaincodeParams, err := utils.MarshallProto(chaincodeParams)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -79,7 +78,7 @@ func (t *EnclaveChaincode) initEnclave(stub shim.ChaincodeStubInterface) pb.Resp
 		return shim.Error(errMsg)
 	}
 
-	serializedHostParams, err := protoutil.Marshal(hostParams)
+	serializedHostParams, err := utils.MarshallProto(hostParams)
 	if err != nil {
 		return shim.Error(err.Error())
 	}

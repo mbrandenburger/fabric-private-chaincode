@@ -11,10 +11,10 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 	"github.com/hyperledger/fabric-private-chaincode/internal/protos"
 	"github.com/hyperledger/fabric-private-chaincode/internal/utils"
 	"github.com/hyperledger/fabric-protos-go/peer"
-	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/pkg/errors"
 )
 
