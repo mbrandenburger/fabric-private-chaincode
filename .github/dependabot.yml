@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      dev-deps:
-        dependency-type: "development"
-      prod-deps:
-        dependency-type: "production"
+      all-deps:
+        update-types:
+          - minor
+          - patch
