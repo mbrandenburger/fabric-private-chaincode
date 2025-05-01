@@ -1,0 +1,25 @@
+name: Dependabot go mod tidy
+
+on: pull_request
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Go Tidy
+        run: find . -iname "go.mod" -execdir sh -c "go mod tidy" \;
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
