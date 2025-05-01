@@ -5,10 +5,20 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
 
   - package-ecosystem: "gomod"
-    directory: "/"
+    directories:
+      - "**/*"
     allow:
       - dependency-type: all
     schedule:
       interval: "weekly"
+    groups:
+      dev-deps:
+        dependency-type: "development"
+      prod-deps:
+        dependency-type: "production"
