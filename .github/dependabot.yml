@@ -17,8 +17,11 @@ updates:
       - dependency-type: all
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: hyperledger/fabric*
+      - dependency-name: hyperledger-labs/fabric*
     groups:
-      dev-deps:
-        dependency-type: "development"
-      prod-deps:
-        dependency-type: "production"
+      all-deps:
+        update-types:
+          - minor
+          - patch
