@@ -20,7 +20,7 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Go Tidy
-        run: find . -iname "go.mod" -execdir sh -c "go mod tidy" \;
+        run: make gotidy
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
