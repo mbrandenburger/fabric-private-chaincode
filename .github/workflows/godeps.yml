@@ -23,3 +23,6 @@ jobs:
         run: find . -iname "go.mod" -execdir sh -c "go mod tidy" \;
 
       - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit-message: go mod tidy
+          commit_options: "--no-verify --signoff"
