@@ -4,22 +4,24 @@
 
 name: FPC test
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   push:
-    paths-ignore: 
-      - '**.md'
-      - '.github/workflows/**'
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+      - ".github/workflows/**"
   pull_request:
-     paths-ignore: 
-       - '**.md'
-       - '.github/workflows/**'
+    paths-ignore:
+      - "**.md"
+      - ".github/workflows/**"
 
 permissions:
   contents: read
   packages: write
 
 env:
-  DOCKER_REGISTRY: 'ghcr.io'
+  DOCKER_REGISTRY: "ghcr.io"
   PUSH_TO_MAIN: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
 jobs:
@@ -36,11 +38,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
+          submodules: "recursive"
       - uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
-      
+          go-version-file: "go.mod"
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
