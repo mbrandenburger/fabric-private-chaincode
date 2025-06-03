@@ -47,7 +47,7 @@ godeps: gotools
 	$(GO) mod download
 
 gotidy:
-	find . -iname "go.mod" -execdir sh -c "$(GO) mod tidy" \;
+	./scripts/gomate.sh tidy
 
 fpc-sdk: godeps
 	$(foreach DIR, $(FPC_SDK_DEP_DIRS), $(MAKE) -C $(DIR) build || exit;)
